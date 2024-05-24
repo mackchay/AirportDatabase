@@ -1,288 +1,345 @@
 CREATE TYPE "delay_reason" AS ENUM (
-  'weather_conditions',
-  'technical_problems',
-  'tickets_are_not_sold_out'
-);
+    'weather_conditions',
+    'technical_problems',
+    'tickets_are_not_sold_out'
+    );
 
 CREATE TYPE "ticket_status" AS ENUM (
-  'not_purchased',
-  'booked',
-  'purchased'
-);
+    'not_purchased',
+    'booked',
+    'purchased'
+    );
 
 CREATE TYPE "aircraft_status" AS ENUM (
-  'ready',
-  'on_repair',
-  'required_technical_inspection'
+    'ready',
+    'on_repair',
+    'required_technical_inspection'
+    );
+
+CREATE TYPE "flight_type" AS ENUM (
+    'domestic',
+    'international',
+    'charter',
+    'cargo',
+    'special'
+    );
+
+CREATE TYPE "flight_status" AS ENUM (
+    'valid',
+    'completed',
+    'cancelled',
+    'postponed'
+    );
+
+CREATE TYPE "aircraft_type" AS ENUM (
+    'passenger',
+    'private',
+    'cargo',
+    'war'
+    );
+
+CREATE TABLE "airport" (
+                           "id" integer PRIMARY KEY,
+                           "name" varchar(255) NOT NULL,
+                           "location" varchar(255) NOT NULL
 );
 
-CREATE TABLE "employees" (
-  "id" integer PRIMARY KEY,
-  "personal_info" integer UNIQUE,
-  "s" integer,
-  "brigades" integer,
-  "salary" integer,
-  "job_title" integer
+CREATE TABLE "employee" (
+                            "id" integer PRIMARY KEY,
+                            "airport" integer NOT NULL,
+                            "personal_info" integer UNIQUE NOT NULL,
+                            "department" integer,
+                            "brigade" integer,
+                            "salary" integer NOT NULL,
+                            "job_title" integer NOT NULL,
+                            "employment_date" timestamp NOT NULL,
+                            "experience" integer NOT NULL
 );
 
-CREATE TABLE "job_titles" (
-  "id" integer PRIMARY KEY,
-  "job_title" varchar(255)
+CREATE TABLE "job_title" (
+                             "id" integer PRIMARY KEY,
+                             "job_title" varchar(255) NOT NULL
 );
 
 CREATE TABLE "personal_info" (
-  "id" integer PRIMARY KEY,
-  "full_name" varchar(255),
-  "gender" varchar(10),
-  "age" integer,
-  "phone_number" bigint,
-  "children" integer
+                                 "id" integer PRIMARY KEY,
+                                 "full_name" varchar(255) NOT NULL,
+                                 "gender" varchar(10) NOT NULL,
+                                 "age" integer NOT NULL,
+                                 "phone_number" bigint NOT NULL,
+                                 "children" integer NOT NULL
 );
 
-CREATE TABLE "brigades" (
-  "id" integer PRIMARY KEY,
-  "brigade_type" varchar(255),
-  "brigade_head" integer
+CREATE TABLE "brigade" (
+                           "id" integer PRIMARY KEY,
+                           "brigade_type" varchar(255) NOT NULL
 );
 
-CREATE TABLE "delayed_flights" (
-  "id" integer PRIMARY KEY,
-  "delay_reason" delay_reason
+CREATE TABLE "brigade_head" (
+                                "id" integer PRIMARY KEY,
+                                "employee" integer UNIQUE NOT NULL
 );
 
-CREATE TABLE "departments" (
-  "id" integer PRIMARY KEY,
-  "department_name" varchar(255),
-  "department_head" integer
+CREATE TABLE "department_head" (
+                                   "id" integer PRIMARY KEY,
+                                   "employee" integer UNIQUE NOT NULL
+);
+
+CREATE TABLE "delayed_flight" (
+                                  "id" integer PRIMARY KEY,
+                                  "delay_reason" delay_reason NOT NULL,
+                                  "old_date" timestamp NOT NULL,
+                                  "new_date" timestamp
+);
+
+CREATE TABLE "department" (
+                              "id" integer PRIMARY KEY,
+                              "department_name" varchar(255) NOT NULL
 );
 
 CREATE TABLE "aircraft" (
-  "id" integer PRIMARY KEY,
-  "type" varchar(255),
-  "crew" integer UNIQUE,
-  "arrival_time" date,
-  "experience" integer
+                            "id" integer PRIMARY KEY,
+                            "type" aircraft_type NOT NULL,
+                            "arrival_time" timestamp NOT NULL,
+                            "airport" integer,
+                            "experience" integer NOT NULL,
+                            "age" integer NOT NULL
 );
 
 CREATE TABLE "crew" (
-  "id" integer PRIMARY KEY,
-  "pilot_brigade" integer,
-  "technicians_brigade" integer,
-  "maintenance_brigade" integer
+                        "id" integer PRIMARY KEY,
+                        "aircraft" integer,
+                        "pilot_brigade" integer UNIQUE NOT NULL,
+                        "technicians_brigade" integer UNIQUE NOT NULL,
+                        "maintenance_brigade" integer UNIQUE NOT NULL
 );
 
-CREATE TABLE "seats" (
-  "id" integer PRIMARY KEY,
-  "name" varchar(20),
-  "aircraft" integer
+CREATE TABLE "seat" (
+                        "id" integer PRIMARY KEY,
+                        "name" varchar(20) NOT NULL
 );
 
 CREATE TABLE "route" (
-  "id" integer PRIMARY KEY,
-  "departure" varchar(255),
-  "destination" varchar(255),
-  "transfer" varchar(255)
+                         "id" integer PRIMARY KEY,
+                         "departure_airport" integer NOT NULL,
+                         "destination_airport" integer NOT NULL,
+                         "transfer_airport" integer
 );
 
-CREATE TABLE "booked_tickets" (
-  "id" integer PRIMARY KEY,
-  "booking_start" timestamp,
-  "booking_end" timestamp
+CREATE TABLE "booked_ticket" (
+                                 "id" integer PRIMARY KEY,
+                                 "booking_start" timestamp NOT NULL,
+                                 "booking_end" timestamp NOT NULL
 );
 
-CREATE TABLE "tickets" (
-  "id" integer PRIMARY KEY,
-  "flight" integer,
-  "passenger" integer,
-  "seat" integer UNIQUE,
-  "purchase_date" date,
-  "status" ticket_status,
-  "baggage" bool
+CREATE TABLE "ticket" (
+                          "id" integer PRIMARY KEY,
+                          "flight" integer NOT NULL,
+                          "passenger" integer,
+                          "seat" integer UNIQUE NOT NULL,
+                          "purchase_date" timestamp,
+                          "refund_date" timestamp,
+                          "ticket_price" integer,
+                          "status" ticket_status NOT NULL,
+                          "baggage" bool
 );
 
-CREATE TABLE "passengers" (
-  "id" integer PRIMARY KEY,
-  "full_name" varchar(255),
-  "gender" varchar(10),
-  "age" integer,
-  "phone_number" bigint,
-  "passport" bigint,
-  "international_passport" bigint
+CREATE TABLE "passenger" (
+                             "id" integer PRIMARY KEY,
+                             "full_name" varchar(255) NOT NULL,
+                             "gender" varchar(10) NOT NULL,
+                             "age" integer NOT NULL,
+                             "phone_number" bigint NOT NULL,
+                             "passport" bigint NOT NULL,
+                             "international_passport" bigint
 );
 
-CREATE TABLE "medical_examinations" (
-  "id" integer PRIMARY KEY,
-  "pilot" integer,
-  "date" timestamp,
-  "result" bool
+CREATE TABLE "medical_examination" (
+                                       "id" integer PRIMARY KEY,
+                                       "pilot" integer NOT NULL,
+                                       "date" timestamp NOT NULL,
+                                       "result" bool NOT NULL
 );
 
-CREATE TABLE "schedule" (
-  "id" integer PRIMARY KEY,
-  "flight_type" varchar(255),
-  "route" integer,
-  "ticket_price" integer,
-  "departure" timestamp,
-  "landing" timestamp,
-  "status" varchar(255)
+CREATE TABLE "flight" (
+                          "id" integer PRIMARY KEY,
+                          "flight_type" flight_type NOT NULL,
+                          "aircraft" integer NOT NULL,
+                          "route" integer NOT NULL,
+                          "departure" timestamp NOT NULL,
+                          "landing" timestamp NOT NULL,
+                          "status" flight_status NOT NULL
 );
 
-CREATE TABLE "pilots" (
-  "employee" integer PRIMARY KEY,
-  "license_type" varchar(255),
-  "experience" integer,
-  "employment_date" integer,
-  "specialization" varchar(255)
+CREATE TABLE "pilot" (
+                         "employee" integer PRIMARY KEY,
+                         "license_type" varchar(255),
+                         "specialization" varchar(255)
 );
 
-CREATE TABLE "dispatchers" (
-  "employee" integer PRIMARY KEY,
-  "certification_level" varchar(255),
-  "experience" integer,
-  "employment_date" integer,
-  "handling_stressful_situations" varchar(255)
+CREATE TABLE "dispatcher" (
+                              "employee" integer PRIMARY KEY,
+                              "certification_level" varchar(255),
+                              "handling_stressful_situations" varchar(255)
 );
 
-CREATE TABLE "technicians" (
-  "employee" integer PRIMARY KEY,
-  "specialization" varchar,
-  "skill_level" varchar(255),
-  "experience" integer,
-  "employment_date" integer
+CREATE TABLE "technician" (
+                              "employee" integer PRIMARY KEY,
+                              "specialization" varchar(255),
+                              "skill_level" varchar(255)
 );
 
-CREATE TABLE "cashiers" (
-  "employee" integer PRIMARY KEY,
-  "equipment_skills" varchar(255),
-  "ticket_sales_policies_and_procedure_knowledge" varchar(255),
-  "communication_skills" varchar(255),
-  "experience" integer,
-  "employment_date" integer
+CREATE TABLE "cashier" (
+                           "employee" integer PRIMARY KEY,
+                           "equipment_skills" varchar(255),
+                           "ticket_sales_policies_and_procedure_knowledge" varchar(255),
+                           "communication_skills" varchar(255)
 );
 
 CREATE TABLE "security_staff" (
-  "employee" integer PRIMARY KEY,
-  "security_training_level" varchar(255),
-  "experience" integer,
-  "employment_date" integer,
-  "detecting_and_responding_to_security_incidents_skills" varchar(255)
+                                  "employee" integer PRIMARY KEY,
+                                  "security_training_level" varchar(255),
+                                  "detecting_and_responding_to_security_incidents_skills" varchar(255)
 );
 
 CREATE TABLE "information_service" (
-  "employee" integer PRIMARY KEY,
-  "airport_procedures_and_regulations_knowledge" varchar(255),
-  "communication_skills" varchar(255),
-  "flight_schedules_and_etc_knowledge" varchar(255),
-  "experience" integer,
-  "employment_date" integer
+                                       "employee" integer PRIMARY KEY,
+                                       "airport_procedures_and_regulations_knowledge" varchar(255),
+                                       "communication_skills" varchar(255),
+                                       "flight_schedules_and_etc_knowledge" varchar(255)
 );
 
 CREATE TABLE "administration" (
-  "employee" integer PRIMARY KEY,
-  "management_work_experience" integer,
-  "analytical_and_planning_skills" varchar(255),
-  "aviation_industry_knowledge" varchar(255),
-  "employment_date" integer
+                                  "employee" integer PRIMARY KEY,
+                                  "analytical_and_planning_skills" varchar(255),
+                                  "aviation_industry_knowledge" varchar(255)
 );
 
 CREATE TABLE "service_staff" (
-  "employee" integer PRIMARY KEY,
-  "passenger_service_professionalism" varchar(255),
-  "luggage_handling_skills" varchar(255),
-  "cleanliness_and_accuracy_in_salon_service" varchar(255),
-  "experience" integer,
-  "employment_date" integer
+                                 "employee" integer PRIMARY KEY,
+                                 "passenger_service_professionalism" varchar(255),
+                                 "luggage_handling_skills" varchar(255),
+                                 "cleanliness_and_accuracy_in_salon_service" varchar(255)
+);
+
+CREATE TABLE "technical_inspection" (
+                                        "id" integer PRIMARY KEY,
+                                        "aircraft" integer NOT NULL,
+                                        "date" timestamp NOT NULL,
+                                        "result" bool NOT NULL
 );
 
 CREATE TABLE "maintenance" (
-  "id" integer,
-  "aircraft" integer,
-  "service_type" varchar(255),
-  "date" timestamp,
-  "result" bool
+                               "id" integer PRIMARY KEY,
+                               "aircraft" integer NOT NULL,
+                               "date" timestamp NOT NULL
 );
 
 CREATE TABLE "repair" (
-  "id" integer,
-  "aircraft" integer,
-  "repair_type" varchar(255),
-  "date" timestamp,
-  "result" bool
+                          "id" integer PRIMARY KEY,
+                          "aircraft" integer NOT NULL,
+                          "repair_type" varchar(255),
+                          "date" timestamp NOT NULL
 );
 
-CREATE TABLE "customs_control" (
-  "id" integer,
-  "inspection_type" varchar(255),
-  "passenger" integer,
-  "result" bool
+CREATE TABLE "custom_control_transaction" (
+                                              "id" integer PRIMARY KEY,
+                                              "inspection_type" varchar(255),
+                                              "passenger" integer NOT NULL,
+                                              "date" timestamp NOT NULL,
+                                              "result" bool NOT NULL
+);
+
+CREATE TABLE "hangar_space" (
+                                "id" integer PRIMARY KEY,
+                                "hangar" integer NOT NULL,
+                                "aircraft" integer NOT NULL,
+                                "arrival_time" timestamp NOT NULL,
+                                "departure_time" timestamp,
+                                "status" aircraft_status NOT NULL
 );
 
 CREATE TABLE "hangar" (
-  "id" integer,
-  "aircraft" integer,
-  "status" aircraft_status
+                          "id" integer PRIMARY KEY,
+                          "airport" integer NOT NULL
 );
 
-COMMENT ON COLUMN "tickets"."status" IS 'reserved, purchased, not purchased';
+COMMENT ON COLUMN "ticket"."status" IS 'reserved, purchased, not purchased, returned';
 
-COMMENT ON COLUMN "technicians"."specialization" IS 'for example, avionics, mechanic, flight mechanic)';
+COMMENT ON COLUMN "technician"."specialization" IS 'for example, avionics, mechanic, flight mechanic)';
 
-ALTER TABLE "employees" ADD FOREIGN KEY ("brigades") REFERENCES "brigades" ("id");
+ALTER TABLE "employee" ADD FOREIGN KEY ("brigade") REFERENCES "brigade" ("id");
 
-ALTER TABLE "employees" ADD FOREIGN KEY ("s") REFERENCES "departments" ("id");
+ALTER TABLE "employee" ADD FOREIGN KEY ("department") REFERENCES "department" ("id");
 
-ALTER TABLE "departments" ADD FOREIGN KEY ("department_head") REFERENCES "employees" ("id");
+ALTER TABLE "employee" ADD FOREIGN KEY ("personal_info") REFERENCES "personal_info" ("id");
 
-ALTER TABLE "brigades" ADD FOREIGN KEY ("brigade_head") REFERENCES "employees" ("id");
+ALTER TABLE "crew" ADD FOREIGN KEY ("pilot_brigade") REFERENCES "brigade" ("id");
 
-ALTER TABLE "aircraft" ADD FOREIGN KEY ("crew") REFERENCES "crew" ("id");
+ALTER TABLE "crew" ADD FOREIGN KEY ("technicians_brigade") REFERENCES "brigade" ("id");
 
-ALTER TABLE "employees" ADD FOREIGN KEY ("personal_info") REFERENCES "personal_info" ("id");
+ALTER TABLE "crew" ADD FOREIGN KEY ("maintenance_brigade") REFERENCES "brigade" ("id");
 
-ALTER TABLE "crew" ADD FOREIGN KEY ("pilot_brigade") REFERENCES "brigades" ("id");
+ALTER TABLE "ticket" ADD FOREIGN KEY ("passenger") REFERENCES "passenger" ("id");
 
-ALTER TABLE "crew" ADD FOREIGN KEY ("technicians_brigade") REFERENCES "brigades" ("id");
+ALTER TABLE "ticket" ADD FOREIGN KEY ("seat") REFERENCES "seat" ("id");
 
-ALTER TABLE "crew" ADD FOREIGN KEY ("maintenance_brigade") REFERENCES "brigades" ("id");
+ALTER TABLE "flight" ADD FOREIGN KEY ("route") REFERENCES "route" ("id");
 
-ALTER TABLE "seats" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
+ALTER TABLE "ticket" ADD FOREIGN KEY ("flight") REFERENCES "flight" ("id");
 
-ALTER TABLE "tickets" ADD FOREIGN KEY ("passenger") REFERENCES "passengers" ("id");
+ALTER TABLE "pilot" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
-ALTER TABLE "tickets" ADD FOREIGN KEY ("seat") REFERENCES "seats" ("id");
+ALTER TABLE "security_staff" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
-ALTER TABLE "schedule" ADD FOREIGN KEY ("route") REFERENCES "route" ("id");
+ALTER TABLE "information_service" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
-ALTER TABLE "tickets" ADD FOREIGN KEY ("flight") REFERENCES "schedule" ("id");
+ALTER TABLE "service_staff" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
-ALTER TABLE "pilots" ADD FOREIGN KEY ("employee") REFERENCES "employees" ("id");
+ALTER TABLE "dispatcher" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
-ALTER TABLE "security_staff" ADD FOREIGN KEY ("employee") REFERENCES "employees" ("id");
+ALTER TABLE "cashier" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
-ALTER TABLE "information_service" ADD FOREIGN KEY ("employee") REFERENCES "employees" ("id");
+ALTER TABLE "administration" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
-ALTER TABLE "service_staff" ADD FOREIGN KEY ("employee") REFERENCES "employees" ("id");
+ALTER TABLE "medical_examination" ADD FOREIGN KEY ("pilot") REFERENCES "pilot" ("employee");
 
-ALTER TABLE "dispatchers" ADD FOREIGN KEY ("employee") REFERENCES "employees" ("id");
-
-ALTER TABLE "cashiers" ADD FOREIGN KEY ("employee") REFERENCES "employees" ("id");
-
-ALTER TABLE "administration" ADD FOREIGN KEY ("employee") REFERENCES "employees" ("id");
-
-ALTER TABLE "medical_examinations" ADD FOREIGN KEY ("pilot") REFERENCES "pilots" ("employee");
-
-ALTER TABLE "technicians" ADD FOREIGN KEY ("employee") REFERENCES "employees" ("id");
+ALTER TABLE "technician" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
 ALTER TABLE "maintenance" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
 
 ALTER TABLE "repair" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
 
-ALTER TABLE "customs_control" ADD FOREIGN KEY ("passenger") REFERENCES "passengers" ("id");
+ALTER TABLE "custom_control_transaction" ADD FOREIGN KEY ("passenger") REFERENCES "passenger" ("id");
 
-ALTER TABLE "hangar" ADD FOREIGN KEY ("id") REFERENCES "aircraft" ("id");
+ALTER TABLE "employee" ADD FOREIGN KEY ("job_title") REFERENCES "job_title" ("id");
 
-ALTER TABLE "employees" ADD FOREIGN KEY ("job_title") REFERENCES "job_titles" ("id");
+ALTER TABLE "delayed_flight" ADD FOREIGN KEY ("id") REFERENCES "flight" ("id");
 
-ALTER TABLE "delayed_flights" ADD FOREIGN KEY ("id") REFERENCES "schedule" ("id");
+ALTER TABLE "booked_ticket" ADD FOREIGN KEY ("id") REFERENCES "ticket" ("id");
 
-ALTER TABLE "booked_tickets" ADD FOREIGN KEY ("id") REFERENCES "tickets" ("id");
+ALTER TABLE "employee" ADD FOREIGN KEY ("airport") REFERENCES "airport" ("id");
+
+ALTER TABLE "hangar_space" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
+
+ALTER TABLE "hangar" ADD FOREIGN KEY ("airport") REFERENCES "airport" ("id");
+
+ALTER TABLE "hangar_space" ADD FOREIGN KEY ("hangar") REFERENCES "hangar" ("id");
+
+ALTER TABLE "route" ADD FOREIGN KEY ("departure_airport") REFERENCES "airport" ("id");
+
+ALTER TABLE "route" ADD FOREIGN KEY ("destination_airport") REFERENCES "airport" ("id");
+
+ALTER TABLE "route" ADD FOREIGN KEY ("transfer_airport") REFERENCES "airport" ("id");
+
+ALTER TABLE "aircraft" ADD FOREIGN KEY ("airport") REFERENCES "airport" ("id");
+
+ALTER TABLE "brigade_head" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
+
+ALTER TABLE "department_head" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
+
+ALTER TABLE "crew" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
+
+ALTER TABLE "flight" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
+
+ALTER TABLE "technical_inspection" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
