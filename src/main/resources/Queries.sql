@@ -1,11 +1,11 @@
 -- 1
 -- Список всех работников
-select distinct employee.id,
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -13,22 +13,29 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
+from employee e
+         inner join public.department d on d.id = e.department
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.airport a on a.id = e.airport
 where airport = ?;
 
 -- Общее число работников
 select count(*) as total_employees
-from employee
+from employee e
+         inner join public.department d on d.id = e.department
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.airport a on a.id = e.airport
 where airport = ?;
 
 -- Список всех работников в указанном отделе
-select distinct employee.id,
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -36,25 +43,32 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
+from employee e
+         inner join public.department d on d.id = e.department
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.airport a on a.id = e.airport
 where airport = ?
   and department = ?;
 
 -- Общее число работников в указанном отделе
 select department, count(*) as total_employees
-from employee
+from employee e
+         inner join public.department d on d.id = e.department
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.airport a on a.id = e.airport
 where airport = ?
   and department = ?
 group by department;
 
 -- Список начальников отдела
-select distinct employee.id,
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -62,26 +76,32 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
-         inner join department_head d on employee.id = d.employee
+from department_head as hd
+         inner join public.employee e on hd.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.airport a on a.id = e.airport
 where airport = ?
   and department = ?;
 
 -- Общее число начальников отдела
 select count(*) as total_department_heads
-from department_head
-         inner join public.employee e on department_head.employee = e.id
+from department_head as dh
+         inner join public.employee e on e.id = dh.employee
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.airport a on a.id = e.airport
 where airport = ?;
 
 -- По стажу работы в аэропорту, половому признаку, возрасту, признаку наличия и количества детей,
 -- по размеру заработной платы
-select distinct employee.id,
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -89,25 +109,26 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
 where airport = :airport
   and experience between :min_experience and :max_experience
   and age between :min_age and :max_age
-  and gender = ?
+  and gender = :gender
   and children between :min_children and :max_children
-  and salary between :min_salary and :max_salary;
+  and salary between :min_salary and :max_salary
+  and department = :department;
 
-
-
--- 2
--- Список всех работников в указанной бригаде
-select distinct employee.id,
+select distinct hd.id,
+                e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -115,18 +136,49 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
+from department_head as hd
+         inner join public.employee e on e.id = hd.employee
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+where airport = :airport
+  and experience between :min_experience and :max_experience
+  and age between :min_age and :max_age
+  and gender = :gender
+  and children between :min_children and :max_children
+  and salary between :min_salary and :max_salary;
+
+-- 2
+-- Список всех работников в указанной бригаде
+select distinct e.id,
+                airport,
+                department,
+                brigade,
+                salary,
+                department_title,
+                employment_date,
+                experience,
+                full_name,
+                gender,
+                age,
+                phone_number,
+                children
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
 where airport = ?
   and department = ?;
 
 -- Список всех работников в указанной бригаде в указанном отделе
-select distinct employee.id,
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -134,34 +186,44 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
 where airport = ?
   and department = ?
   and brigade = ?;
 
 -- Получаем общее число работников в указанной бригаде
-SELECT brigade, COUNT(*) AS total_employees
-FROM employee
+SELECT COUNT(*) AS total_employees
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
 where airport = ?
-  and brigade = ?
-group by brigade;
+  and brigade = ?;
 
 -- Получаем общее число работников в указанной бригаде в указзанном отделе
 SELECT department, brigade, COUNT(*) AS total_employees
-FROM employee
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
 where airport = ?
   and brigade = ?
   and department = ?
 group by brigade, department;
 
 -- Список работников, обслуживающих конкретный рейс
-select distinct employee.id,
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -169,18 +231,27 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
-         JOIN crew ON employee.brigade = crew.id
-         JOIN flight ON crew.aircraft = flight.aircraft
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+         LEFT JOIN
+     crew c ON e.brigade = c.pilot_brigade OR e.brigade = c.technicians_brigade OR e.brigade = c.maintenance_brigade
+         JOIN flight ON c.aircraft = flight.aircraft
 where airport = ?
   and flight.id = ?;
 
 -- Получаем число работников, обслуживающих конкретный рейс
-SELECT COUNT(distinct employee.id) AS total_employees
-FROM employee
-         JOIN crew ON employee.brigade = crew.id
-         JOIN flight ON crew.aircraft = flight.aircraft
+SELECT COUNT(distinct e.id) AS total_employees
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+         LEFT JOIN
+     crew c ON e.brigade = c.pilot_brigade OR e.brigade = c.technicians_brigade OR e.brigade = c.maintenance_brigade
+         JOIN flight ON c.aircraft = flight.aircraft
 WHERE airport = ?
   and flight.id = ?;
 
@@ -189,41 +260,46 @@ WHERE airport = ?
 with brigade_salary as (select employee.id, SUM(salary) as total_salary, AVG(salary) as avg_salary
                         from employee
                                  join public.brigade b on employee.brigade = b.id
-                                 join public.department d on employee.department = d.id
                         group by employee.id)
-select distinct employee.id,
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
                 gender,
                 age,
                 phone_number,
-                children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
-         inner join brigade_salary on employee.id = brigade_salary.id
-where airport = ?
-  and brigade = ?
-  and age >= ?
-  and age <= ?
-  and brigade_salary.avg_salary >= ?
-  and brigade_salary.total_salary <= ?
-  and brigade_salary.total_salary >= ?
-  and brigade_salary.total_salary <= ?;
+                children,
+                avg_salary,
+                total_salary
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+         LEFT JOIN
+     crew c ON e.brigade = c.pilot_brigade OR e.brigade = c.technicians_brigade OR e.brigade = c.maintenance_brigade
+         JOIN flight ON c.aircraft = flight.aircraft
+         inner join brigade_salary on e.id = brigade_salary.id
+where airport = :airport
+  and brigade = :brigade
+  and age between :min_age and :max_age
+  and brigade_salary.avg_salary between :min_avg_salary and :max_avg_salary
+  and brigade_salary.total_salary between :min_total_salary and :max_total_salary
+  and flight.id = ?;
 
 -- 3
--- Список пилотов прошедших медосмотр, список пилотов прошедших медосмотр
-select distinct employee.id,
+-- Список пилотов прошедших медосмотр
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -231,20 +307,23 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
-         inner join public.pilot p2 on employee.id = p2.employee
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+         inner join public.pilot p2 on e.id = p2.employee
          inner join public.medical_examination me on p2.employee = me.pilot
 where airport = ?
   and extract(year from me.date) = ?;
 
--- Список пилотов прошедших медосмотр, список пилотов не прошедших медосмотр
-select distinct employee.id,
+-- Список пилотов не прошедших медосмотр
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -252,40 +331,50 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
-         inner join public.pilot p2 on employee.id = p2.employee
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+         inner join public.pilot p2 on e.id = p2.employee
          left join public.medical_examination me on p2.employee = me.pilot
 where airport = ?
-  and me.pilot is null
-  and extract(year from me.date) = ?;
+  and (pilot is null or result = false)
+  and extract(year from date) = ?;
 
--- Количество пилотов прошедших медосмотр, список пилотов прошедших медосмотр
+-- Количество пилотов прошедших медосмотр
 select count(distinct p.id) as total_pilots
-from employee
-         inner join personal_info p on employee.personal_info = p.id
-         inner join public.pilot p2 on employee.id = p2.employee
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+         inner join public.pilot p2 on e.id = p2.employee
          inner join public.medical_examination me on p2.employee = me.pilot
 where airport = ?
-  and extract(year from me.date) = ?;
+  and extract(year from date) = ?
+  and result = true;
 
--- Количество пилотов не прошедших медосмотр, список пилотов прошедших медосмотр
+-- Количество пилотов не прошедших медосмотр
 select count(*) as total_pilots
-from employee
-         inner join personal_info p on employee.personal_info = p.id
-         inner join public.pilot p2 on employee.id = p2.employee
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+         inner join public.pilot p2 on e.id = p2.employee
          left join public.medical_examination me on p2.employee = me.pilot
-    and extract(year from me.date) = ?
 where airport = ?
-  and me.pilot is null;
+  and extract(year from date) = ?
+  and (pilot is null or result = false);
 
 -- Фильтр по половому пpизнаку, возpасту, pазмеpу заpаботной платы
-select distinct employee.id,
+select distinct e.id,
                 airport,
                 department,
                 brigade,
                 salary,
-                job_title,
+                department_title,
                 employment_date,
                 experience,
                 full_name,
@@ -293,13 +382,46 @@ select distinct employee.id,
                 age,
                 phone_number,
                 children
-from employee
-         inner join personal_info p on employee.personal_info = p.id
-         inner join public.pilot p2 on employee.id = p2.employee
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+         inner join public.pilot p2 on e.id = p2.employee
          inner join public.medical_examination me on p2.employee = me.pilot
 where airport = ?
+  and result = true
   and extract(year from me.date) = ?
-  and gender = 'female'
+  and gender = :gender
+  and age >= ?
+  and age <= ?
+  and salary >= ?
+  and salary <= ?;
+
+select distinct e.id,
+                airport,
+                department,
+                brigade,
+                salary,
+                department_title,
+                employment_date,
+                experience,
+                full_name,
+                gender,
+                age,
+                phone_number,
+                children
+from employee e
+         inner join personal_info p on e.personal_info = p.id
+         inner join public.brigade b on b.id = e.brigade
+         inner join public.department d on d.id = e.department
+         inner join public.airport a on a.id = e.airport
+         inner join public.pilot p2 on e.id = p2.employee
+         left join public.medical_examination me on p2.employee = me.pilot
+where airport = ?
+  and (pilot is null or result = false)
+  and extract(year from date) = ?
+  and gender = :gender
   and age >= ?
   and age <= ?
   and salary >= ?

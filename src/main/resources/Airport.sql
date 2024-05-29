@@ -48,17 +48,11 @@ CREATE TABLE "employee" (
                             "id" integer PRIMARY KEY,
                             "airport" integer NOT NULL,
                             "personal_info" integer UNIQUE NOT NULL,
-                            "department" integer,
                             "brigade" integer,
+                            "department" integer,
                             "salary" integer NOT NULL,
-                            "job_title" integer NOT NULL,
                             "employment_date" timestamp NOT NULL,
                             "experience" integer NOT NULL
-);
-
-CREATE TABLE "job_title" (
-                             "id" integer PRIMARY KEY,
-                             "job_title" varchar(255) NOT NULL
 );
 
 CREATE TABLE "personal_info" (
@@ -71,8 +65,7 @@ CREATE TABLE "personal_info" (
 );
 
 CREATE TABLE "brigade" (
-                           "id" integer PRIMARY KEY,
-                           "brigade_type" varchar(255) NOT NULL
+                           "id" integer PRIMARY KEY
 );
 
 CREATE TABLE "brigade_head" (
@@ -94,7 +87,7 @@ CREATE TABLE "delayed_flight" (
 
 CREATE TABLE "department" (
                               "id" integer PRIMARY KEY,
-                              "department_name" varchar(255) NOT NULL
+                              "department_title" varchar(100) NOT NULL
 );
 
 CREATE TABLE "aircraft" (
@@ -164,7 +157,7 @@ CREATE TABLE "medical_examination" (
 CREATE TABLE "flight" (
                           "id" integer PRIMARY KEY,
                           "flight_type" flight_type NOT NULL,
-                          "aircraft" integer NOT NULL,
+                          "aircraft" integer,
                           "route" integer NOT NULL,
                           "departure" timestamp NOT NULL,
                           "landing" timestamp NOT NULL,
@@ -215,11 +208,11 @@ CREATE TABLE "administration" (
                                   "aviation_industry_knowledge" varchar(255)
 );
 
-CREATE TABLE "service_staff" (
-                                 "employee" integer PRIMARY KEY,
-                                 "passenger_service_professionalism" varchar(255),
-                                 "luggage_handling_skills" varchar(255),
-                                 "cleanliness_and_accuracy_in_salon_service" varchar(255)
+CREATE TABLE "maintenance_staff" (
+                                     "employee" integer PRIMARY KEY,
+                                     "passenger_service_professionalism" varchar(255),
+                                     "luggage_handling_skills" varchar(255),
+                                     "cleanliness_and_accuracy_in_salon_service" varchar(255)
 );
 
 CREATE TABLE "technical_inspection" (
@@ -270,8 +263,6 @@ COMMENT ON COLUMN "technician"."specialization" IS 'for example, avionics, mecha
 
 ALTER TABLE "employee" ADD FOREIGN KEY ("brigade") REFERENCES "brigade" ("id");
 
-ALTER TABLE "employee" ADD FOREIGN KEY ("department") REFERENCES "department" ("id");
-
 ALTER TABLE "employee" ADD FOREIGN KEY ("personal_info") REFERENCES "personal_info" ("id");
 
 ALTER TABLE "crew" ADD FOREIGN KEY ("pilot_brigade") REFERENCES "brigade" ("id");
@@ -294,7 +285,7 @@ ALTER TABLE "security_staff" ADD FOREIGN KEY ("employee") REFERENCES "employee" 
 
 ALTER TABLE "information_service" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
-ALTER TABLE "service_staff" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
+ALTER TABLE "maintenance_staff" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
 ALTER TABLE "dispatcher" ADD FOREIGN KEY ("employee") REFERENCES "employee" ("id");
 
@@ -312,13 +303,9 @@ ALTER TABLE "repair" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
 
 ALTER TABLE "custom_control_transaction" ADD FOREIGN KEY ("passenger") REFERENCES "passenger" ("id");
 
-ALTER TABLE "employee" ADD FOREIGN KEY ("job_title") REFERENCES "job_title" ("id");
-
 ALTER TABLE "delayed_flight" ADD FOREIGN KEY ("id") REFERENCES "flight" ("id");
 
 ALTER TABLE "booked_ticket" ADD FOREIGN KEY ("id") REFERENCES "ticket" ("id");
-
-ALTER TABLE "employee" ADD FOREIGN KEY ("airport") REFERENCES "airport" ("id");
 
 ALTER TABLE "hangar_space" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
 
@@ -340,6 +327,10 @@ ALTER TABLE "department_head" ADD FOREIGN KEY ("employee") REFERENCES "employee"
 
 ALTER TABLE "crew" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
 
+ALTER TABLE "technical_inspection" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
+
 ALTER TABLE "flight" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
 
-ALTER TABLE "technical_inspection" ADD FOREIGN KEY ("aircraft") REFERENCES "aircraft" ("id");
+ALTER TABLE "employee" ADD FOREIGN KEY ("airport") REFERENCES "airport" ("id");
+
+ALTER TABLE "employee" ADD FOREIGN KEY ("department") REFERENCES "department" ("id");
